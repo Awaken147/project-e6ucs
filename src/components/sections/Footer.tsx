@@ -2,6 +2,7 @@
 
 import { motion } from 'framer-motion';
 import { Heart, Mail, Phone, MapPin, ArrowUp } from 'lucide-react';
+import NeonLogo from '@/components/NeonLogo';
 
 const footerLinks = {
   Services: [
@@ -142,15 +143,7 @@ export default function Footer() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-10 lg:gap-8">
             {/* Brand */}
             <div className="lg:col-span-2">
-              <div className="flex items-center gap-2 mb-4">
-                <div className="w-9 h-9 flex items-center justify-center bg-gradient-to-br from-[#00ff88] to-[#ffd700] rounded-lg">
-                  <span className="font-bold text-black text-sm">SA</span>
-                </div>
-                <span className="font-bold text-lg">
-                  <span className="text-white">Subz</span>
-                  <span className="text-gradient-green">Agency</span>
-                </span>
-              </div>
+              <NeonLogo variant="footer" onClick={scrollToTop} />
               <p className="text-sm text-gray-500 leading-relaxed mb-6 max-w-sm">
                 India&apos;s premier cinematic 3D web agency. We transform ideas into
                 breathtaking digital experiences that captivate and convert.

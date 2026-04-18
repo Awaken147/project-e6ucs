@@ -3,6 +3,7 @@
 import { useEffect, useRef, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { ArrowDown, Zap, Globe, Palette } from 'lucide-react';
+import NeonLogo from '@/components/NeonLogo';
 
 /* ─── Canvas particle background ─── */
 function ParticleCanvas() {
@@ -120,11 +121,27 @@ export default function HeroSection() {
       </div>
 
       <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 text-center">
+        {/* 3D Neon Logo — Hero */}
+        <motion.div
+          initial={{ opacity: 0, y: 30, scale: 0.9 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          transition={{ duration: 1, delay: 0.1, ease: 'easeOut' }}
+          className="mb-8 sm:mb-10"
+        >
+          <motion.div
+            animate={{ y: [0, -8, 0], rotateY: [0, 2, 0, -2, 0] }}
+            transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
+            style={{ perspective: '800px', transformStyle: 'preserve-3d' }}
+          >
+            <NeonLogo variant="hero" />
+          </motion.div>
+        </motion.div>
+
         {/* Badge */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.2 }}
+          transition={{ duration: 0.6, delay: 0.5 }}
           className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass mb-8"
         >
           <Zap className="w-4 h-4 text-[#00ff88]" />
@@ -136,7 +153,7 @@ export default function HeroSection() {
         <motion.h1
           initial={{ opacity: 0, y: 40 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.4 }}
+          transition={{ duration: 0.8, delay: 0.7 }}
           className="text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-black leading-[0.95] tracking-tight mb-6"
         >
           <span className="block text-white">We Build</span>

@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Menu, X, Sparkles } from 'lucide-react';
+import NeonLogo from '@/components/NeonLogo';
 
 const navLinks = [
   { label: 'Home', href: '#hero' },
@@ -44,22 +45,7 @@ export default function Navbar() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16 sm:h-20">
             {/* Logo */}
-            <motion.a
-              href="#hero"
-              onClick={(e) => { e.preventDefault(); handleClick('#hero'); }}
-              className="flex items-center gap-2 group"
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              <div className="relative w-9 h-9 flex items-center justify-center">
-                <div className="absolute inset-0 bg-gradient-to-br from-[#00ff88] to-[#ffd700] rounded-lg opacity-80 group-hover:opacity-100 transition-opacity" />
-                <span className="relative font-bold text-black text-sm">SA</span>
-              </div>
-              <span className="font-bold text-lg tracking-tight hidden sm:block">
-                <span className="text-white">Subz</span>
-                <span className="text-gradient-green">Agency</span>
-              </span>
-            </motion.a>
+            <NeonLogo variant="nav" onClick={() => handleClick('#hero')} />
 
             {/* Desktop Nav */}
             <div className="hidden md:flex items-center gap-1">
