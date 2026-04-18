@@ -1,8 +1,38 @@
 'use client';
 
-import { useRef, useCallback, useState } from 'react';
-import { motion, useInView } from 'framer-motion';
-import { Check, Star, Zap, Crown, Rocket, Shield, Heart } from 'lucide-react';
+import { useRef, useCallback, useState, useEffect } from 'react';
+import { motion, useInView, AnimatePresence } from 'framer-motion';
+import { Check, Star, Zap, Crown, Rocket, Shield, Heart, X, CreditCard, RefreshCw } from 'lucide-react';
+import Script from 'next/script';
+
+/* ─── Razorpay global type ─── */
+declare global {
+  interface Window {
+    Razorpay: new (options: RazorpayOptions) => RazorpayInstance;
+  }
+}
+
+interface RazorpayOptions {
+  key: string;
+  amount: number;
+  currency: string;
+  name: string;
+  description: string;
+  theme: { color: string };
+  prefill: { contact?: string; name?: string; email?: string };
+  handler: (response: RazorpayResponse) => void;
+  modal: { ondismiss?: () => void };
+}
+
+interface RazorpayInstance {
+  open: () => void;
+}
+
+interface RazorpayResponse {
+  razorpay_payment_id: string;
+  razorpay_order_id?: string;
+  razorpay_signature?: string;
+}
 
 /* ─── 3D Tilt Card Hook ─── */
 function useTilt(intensity = 15) {
@@ -36,10 +66,189 @@ function useTilt(intensity = 15) {
   return { cardRef, handleMouseMove, handleMouseLeave };
 }
 
+/* ─── Success Modal ─── */
+function SuccessModal({ onClose }: { onClose: () => void }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="fixed inset-0 z-[9998] flex items-center justify-center p-4"
+      onClick={onClose}
+    >
+      {/* Backdrop */}
+      <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" />
+
+      {/* Modal */}
+      <motion.div
+        initial={{ scale: 0.5, opacity: 0, rotateY: -90 }}
+        animate={{ scale: 1, opacity: 1, rotateY: 0 }}
+        exit={{ scale: 0.8, opacity: 0 }}
+        transition={{ type: 'spring', duration: 0.7, bounce: 0.3 }}
+        onClick={(e) => e.stopPropagation()}
+        className="relative w-full max-w-md rounded-2xl p-[1px] bg-gradient-to-br from-[#00ff88] via-[#ffd700] to-[#00ff88]"
+      >
+        <div className="relative rounded-2xl bg-[#0a0a1a] p-8 text-center overflow-hidden">
+          {/* Confetti glow */}
+          <div className="absolute inset-0 opacity-20">
+            <div className="absolute top-8 left-8 w-3 h-3 rounded-full bg-[#00ff88] animate-bounce" style={{ animationDelay: '0s' }} />
+            <div className="absolute top-12 right-12 w-2 h-2 rounded-full bg-[#ffd700] animate-bounce" style={{ animationDelay: '0.1s' }} />
+            <div className="absolute bottom-16 left-16 w-2.5 h-2.5 rounded-full bg-[#ff6b35] animate-bounce" style={{ animationDelay: '0.2s' }} />
+            <div className="absolute bottom-12 right-8 w-3 h-3 rounded-full bg-[#22d3ee] animate-bounce" style={{ animationDelay: '0.15s' }} />
+            <div className="absolute top-20 left-1/2 w-2 h-2 rounded-full bg-[#ff2d55] animate-bounce" style={{ animationDelay: '0.25s' }} />
+            <div className="absolute top-1/3 left-4 w-1.5 h-1.5 rounded-full bg-[#a855f7] animate-bounce" style={{ animationDelay: '0.3s' }} />
+          </div>
+
+          {/* Close button */}
+          <button
+            onClick={onClose}
+            className="absolute top-4 right-4 w-8 h-8 rounded-full glass flex items-center justify-center text-gray-400 hover:text-white transition-colors cursor-pointer"
+          >
+            <X className="w-4 h-4" />
+          </button>
+
+          {/* Success icon */}
+          <motion.div
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            transition={{ delay: 0.3, type: 'spring', bounce: 0.5 }}
+            className="w-20 h-20 rounded-full bg-gradient-to-br from-[#00ff88] to-[#00cc6a] flex items-center justify-center mx-auto mb-6 shadow-[0_0_40px_rgba(0,255,136,0.3)]"
+          >
+            <motion.span
+              initial={{ scale: 0, rotate: -180 }}
+              animate={{ scale: 1, rotate: 0 }}
+              transition={{ delay: 0.5, type: 'spring' }}
+              className="text-4xl"
+            >
+              ✓
+            </motion.span>
+          </motion.div>
+
+          <motion.h3
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4 }}
+            className="text-2xl font-black text-white mb-3"
+          >
+            Payment Successful! 🎉
+          </motion.h3>
+
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5 }}
+            className="text-gray-300 text-sm leading-relaxed mb-6"
+          >
+            Thank you for choosing <span className="text-[#00ff88] font-bold">SubzAgency</span>. Our team will contact you shortly.
+          </motion.p>
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.6 }}
+            className="bg-[#00ff88]/5 border border-[#00ff88]/20 rounded-xl p-4 mb-6"
+          >
+            <p className="text-xs text-gray-400 leading-relaxed">
+              Please WhatsApp{' '}
+              <a
+                href="https://wa.me/916297097642?text=Hi%2C%20I%20just%20paid%20for%20a%20SubzAgency%20package.%20Here%20are%20my%20order%20details."
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-[#00ff88] font-bold underline hover:text-[#00cc6a] transition-colors"
+              >
+                +91 62970 97642
+              </a>{' '}
+              with your order details to start your project immediately.
+            </p>
+          </motion.div>
+
+          <motion.a
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.7 }}
+            href="https://wa.me/916297097642?text=Hi%2C%20I%20just%20paid%20for%20a%20SubzAgency%20package.%20Here%20are%20my%20order%20details."
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-[#25D366] to-[#128C7E] text-white font-bold text-sm hover:shadow-[0_0_30px_rgba(37,211,102,0.3)] transition-all"
+          >
+            <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
+            </svg>
+            WhatsApp Us Now
+          </motion.a>
+        </div>
+      </motion.div>
+    </motion.div>
+  );
+}
+
+/* ─── Error Modal ─── */
+function ErrorModal({ onRetry, onClose }: { onRetry: () => void; onClose: () => void }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="fixed inset-0 z-[9998] flex items-center justify-center p-4"
+      onClick={onClose}
+    >
+      <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" />
+
+      <motion.div
+        initial={{ scale: 0.8, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        exit={{ scale: 0.8, opacity: 0 }}
+        transition={{ type: 'spring', duration: 0.5 }}
+        onClick={(e) => e.stopPropagation()}
+        className="relative w-full max-w-sm rounded-2xl p-[1px] bg-gradient-to-br from-[#ff2d55] via-[#ff6b35] to-[#ff2d55]"
+      >
+        <div className="relative rounded-2xl bg-[#0a0a1a] p-8 text-center">
+          <button
+            onClick={onClose}
+            className="absolute top-4 right-4 w-8 h-8 rounded-full glass flex items-center justify-center text-gray-400 hover:text-white transition-colors cursor-pointer"
+          >
+            <X className="w-4 h-4" />
+          </button>
+
+          <div className="w-16 h-16 rounded-full bg-[#ff2d55]/10 border border-[#ff2d55]/20 flex items-center justify-center mx-auto mb-6">
+            <X className="w-8 h-8 text-[#ff2d55]" />
+          </div>
+
+          <h3 className="text-xl font-bold text-white mb-2">Payment Failed</h3>
+          <p className="text-gray-400 text-sm mb-6">
+            Something went wrong. Don&apos;t worry — your money was not charged. Please try again or contact us on WhatsApp.
+          </p>
+
+          <div className="flex flex-col gap-3">
+            <motion.button
+              whileHover={{ scale: 1.03 }}
+              whileTap={{ scale: 0.97 }}
+              onClick={onRetry}
+              className="flex items-center justify-center gap-2 w-full py-3 rounded-xl bg-gradient-to-r from-[#00ff88] to-[#00cc6a] text-black font-bold text-sm cursor-pointer"
+            >
+              <RefreshCw className="w-4 h-4" />
+              Retry Payment
+            </motion.button>
+            <a
+              href="https://wa.me/916297097642?text=Hi%2C%20I%20tried%20paying%20but%20got%20an%20error.%20Please%20help."
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center justify-center gap-2 w-full py-3 rounded-xl border border-white/10 text-white font-medium text-sm hover:border-[#00ff88]/40 transition-all"
+            >
+              Contact on WhatsApp
+            </a>
+          </div>
+        </div>
+      </motion.div>
+    </motion.div>
+  );
+}
+
 /* ─── Single Pricing Card ─── */
 interface PricingCardProps {
   name: string;
   price: string;
+  pricePaise: number;
   originalPrice?: string;
   period?: string;
   features: string[];
@@ -48,11 +257,14 @@ interface PricingCardProps {
   badge?: string;
   accentColor?: string;
   delay?: number;
+  onBuy: () => void;
+  loading?: boolean;
 }
 
 function PricingCard({
   name,
   price,
+  pricePaise: _pricePaise,
   originalPrice,
   period,
   features,
@@ -61,6 +273,8 @@ function PricingCard({
   badge,
   accentColor = '#00ff88',
   delay = 0,
+  onBuy,
+  loading,
 }: PricingCardProps) {
   const { cardRef, handleMouseMove, handleMouseLeave } = useTilt(12);
   const [hovered, setHovered] = useState(false);
@@ -95,7 +309,7 @@ function PricingCard({
       >
         {/* Inner card */}
         <div
-          className={`relative rounded-2xl p-6 sm:p-8 backdrop-blur-xl overflow-hidden transition-all duration-500 ${
+          className={`relative rounded-2xl p-6 sm:p-8 backdrop-blur-xl overflow-hidden transition-all duration-500 flex flex-col ${
             popular
               ? 'bg-[#0a0a1a] lg:p-8'
               : 'bg-[#0a0a1a]/80'
@@ -173,17 +387,34 @@ function PricingCard({
             ))}
           </ul>
 
-          {/* CTA */}
+          {/* Buy Now CTA */}
           <motion.button
             whileHover={{ scale: 1.03 }}
             whileTap={{ scale: 0.97 }}
-            className={`w-full py-3.5 rounded-xl font-bold text-sm transition-all duration-300 ${
+            onClick={onBuy}
+            disabled={loading}
+            className={`w-full py-4 rounded-xl font-bold text-sm transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60 disabled:cursor-wait ${
               popular
-                ? 'bg-gradient-to-r from-[#00ff88] to-[#00cc6a] text-black hover:shadow-[0_0_30px_rgba(0,255,136,0.3)]'
-                : 'border border-white/10 text-white hover:border-[#00ff88]/40 hover:bg-[#00ff8808]'
+                ? 'bg-gradient-to-r from-[#00ff88] to-[#00cc6a] text-black hover:shadow-[0_0_40px_rgba(0,255,136,0.35)]'
+                : 'border border-white/10 text-white hover:border-[#00ff88]/40 hover:bg-[#00ff8808] hover:shadow-[0_0_30px_rgba(0,255,136,0.15)]'
             }`}
+            style={!popular ? { boxShadow: hovered ? '0 0 30px rgba(34,211,238,0.15)' : undefined } : undefined}
           >
-            {popular ? 'Get Started Now' : 'Choose Plan'}
+            {loading ? (
+              <>
+                <motion.div
+                  animate={{ rotate: 360 }}
+                  transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
+                  className="w-4 h-4 border-2 border-black/20 border-t-black rounded-full"
+                />
+                Processing...
+              </>
+            ) : (
+              <>
+                <CreditCard className="w-4 h-4" />
+                {popular ? 'Pay Now & Get Started' : 'Buy Now'}
+              </>
+            )}
           </motion.button>
         </div>
       </div>
@@ -195,13 +426,16 @@ function PricingCard({
 interface HostingCardProps {
   name: string;
   price: string;
+  pricePaise: number;
   features: string[];
   icon: React.ReactNode;
   popular?: boolean;
   delay?: number;
+  onBuy: () => void;
+  loading?: boolean;
 }
 
-function HostingCard({ name, price, features, icon, popular, delay = 0 }: HostingCardProps) {
+function HostingCard({ name, price, pricePaise: _pricePaise, features, icon, popular, delay = 0, onBuy, loading }: HostingCardProps) {
   const { cardRef, handleMouseMove, handleMouseLeave } = useTilt(8);
   const [hovered, setHovered] = useState(false);
 
@@ -227,7 +461,7 @@ function HostingCard({ name, price, features, icon, popular, delay = 0 }: Hostin
             : ''
         }`}
       >
-        <div className={`relative rounded-2xl p-6 bg-[#0a0a1a]/90 backdrop-blur-xl`}>
+        <div className={`relative rounded-2xl p-6 bg-[#0a0a1a]/90 backdrop-blur-xl flex flex-col`}>
           <div className="card-3d-shine" />
           
           {popular && (
@@ -252,7 +486,7 @@ function HostingCard({ name, price, features, icon, popular, delay = 0 }: Hostin
             </div>
           </div>
 
-          <ul className="space-y-2 mb-6">
+          <ul className="space-y-2 mb-6 flex-1">
             {features.map((f, i) => (
               <li key={i} className="flex items-center gap-2 text-xs text-gray-400">
                 <Check className="w-3 h-3" style={{ color: popular ? '#ffd700' : '#00ff88' }} />
@@ -264,13 +498,29 @@ function HostingCard({ name, price, features, icon, popular, delay = 0 }: Hostin
           <motion.button
             whileHover={{ scale: 1.03 }}
             whileTap={{ scale: 0.97 }}
-            className={`w-full py-2.5 rounded-lg font-semibold text-sm transition-all ${
+            onClick={onBuy}
+            disabled={loading}
+            className={`w-full py-2.5 rounded-lg font-semibold text-sm transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60 disabled:cursor-wait ${
               popular
-                ? 'bg-gradient-to-r from-[#ffd700] to-[#ff6b35] text-black'
-                : 'border border-white/10 text-white hover:border-white/20'
+                ? 'bg-gradient-to-r from-[#ffd700] to-[#ff6b35] text-black hover:shadow-[0_0_30px_rgba(255,215,0,0.3)]'
+                : 'border border-white/10 text-white hover:border-white/20 hover:shadow-[0_0_20px_rgba(34,211,238,0.15)]'
             }`}
           >
-            Subscribe
+            {loading ? (
+              <>
+                <motion.div
+                  animate={{ rotate: 360 }}
+                  transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
+                  className="w-3 h-3 border-2 border-black/20 border-t-black rounded-full"
+                />
+                Processing...
+              </>
+            ) : (
+              <>
+                <CreditCard className="w-3.5 h-3.5" />
+                Subscribe Now
+              </>
+            )}
           </motion.button>
         </div>
       </div>
@@ -283,10 +533,79 @@ export default function PricingSection() {
   const ref = useRef<HTMLDivElement>(null);
   const isInView = useInView(ref, { once: true, margin: '-100px' });
 
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [showError, setShowError] = useState(false);
+  const [loadingPkg, setLoadingPkg] = useState<string | null>(null);
+  const [retryOptions, setRetryOptions] = useState<{ packageName: string; amountPaise: number } | null>(null);
+  const razorpayLoadedRef = useRef(false);
+
+  /* Load Razorpay script */
+  useEffect(() => {
+    const existingScript = document.querySelector('script[src*="checkout.razorpay.com"]');
+    if (existingScript) {
+      razorpayLoadedRef.current = true;
+    }
+  }, []);
+
+  /* Open Razorpay checkout */
+  const openRazorpay = useCallback((options: {
+    packageName: string;
+    amountPaise: number;
+  }) => {
+    setLoadingPkg(options.packageName);
+
+    const loadAndOpen = () => {
+      if (!window.Razorpay) {
+        // Script not yet loaded — wait briefly
+        setTimeout(() => loadAndOpen(), 300);
+        return;
+      }
+
+      const rzp = new window.Razorpay({
+        key: 'rzp_test_XXXX', // ⚠️ Replace with your real Razorpay Key ID
+        amount: options.amountPaise,
+        currency: 'INR',
+        name: 'SubzAgency',
+        description: options.packageName,
+        theme: {
+          color: '#22d3ee',
+        },
+        prefill: {
+          contact: '+91 ',
+        },
+        handler: (_response: RazorpayResponse) => {
+          setLoadingPkg(null);
+          setShowSuccess(true);
+        },
+        modal: {
+          ondismiss: () => {
+            setLoadingPkg(null);
+          },
+        },
+      });
+
+      rzp.on('payment.failed', () => {
+        setLoadingPkg(null);
+        setRetryOptions(options);
+        setShowError(true);
+      });
+
+      rzp.open();
+    };
+
+    loadAndOpen();
+  }, []);
+
+  /* Buy handlers */
+  const handleBuy = useCallback((packageName: string, amountPaise: number) => {
+    openRazorpay({ packageName, amountPaise });
+  }, [openRazorpay]);
+
   const websitePackages = [
     {
       name: 'Starter',
       price: '₹9,999',
+      pricePaise: 999900,
       period: 'one-time',
       icon: <Zap className="w-7 h-7" />,
       accentColor: '#00ff88',
@@ -300,6 +619,7 @@ export default function PricingSection() {
     {
       name: 'Growth',
       price: '₹19,999',
+      pricePaise: 1999900,
       period: 'one-time',
       icon: <Rocket className="w-7 h-7" />,
       popular: true,
@@ -316,6 +636,7 @@ export default function PricingSection() {
     {
       name: 'Premium',
       price: '₹34,999',
+      pricePaise: 3499900,
       period: 'one-time',
       icon: <Crown className="w-7 h-7" />,
       accentColor: '#ffd700',
@@ -333,6 +654,7 @@ export default function PricingSection() {
     {
       name: 'Basic Care',
       price: '₹499',
+      pricePaise: 49900,
       icon: <Shield className="w-5 h-5 text-[#00ff88]" />,
       features: [
         'Fast Hosting + SSL',
@@ -343,6 +665,7 @@ export default function PricingSection() {
     {
       name: 'Growth Care',
       price: '₹999',
+      pricePaise: 99900,
       popular: true,
       icon: <Zap className="w-5 h-5 text-[#ffd700]" />,
       features: [
@@ -354,6 +677,7 @@ export default function PricingSection() {
     {
       name: 'Premium Care',
       price: '₹1,999',
+      pricePaise: 199900,
       icon: <Crown className="w-5 h-5 text-[#ffd700]" />,
       features: [
         'Full Maintenance + Advanced Updates',
@@ -368,6 +692,13 @@ export default function PricingSection() {
       {/* Background effects */}
       <div className="absolute inset-0 grid-bg opacity-50" />
       <div className="absolute top-0 left-0 right-0 section-divider" />
+
+      {/* Load Razorpay script */}
+      <Script
+        src="https://checkout.razorpay.com/v1/checkout.js"
+        strategy="lazyOnload"
+        onLoad={() => { razorpayLoadedRef.current = true; }}
+      />
 
       <div ref={ref} className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
@@ -409,7 +740,13 @@ export default function PricingSection() {
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8 mb-20">
           {websitePackages.map((pkg, i) => (
-            <PricingCard key={pkg.name} {...pkg} delay={i * 0.15} />
+            <PricingCard
+              key={pkg.name}
+              {...pkg}
+              delay={i * 0.15}
+              onBuy={() => handleBuy(pkg.name + ' Website Package', pkg.pricePaise)}
+              loading={loadingPkg === pkg.name}
+            />
           ))}
         </div>
 
@@ -427,7 +764,13 @@ export default function PricingSection() {
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto mb-16">
           {hostingPlans.map((plan, i) => (
-            <HostingCard key={plan.name} {...plan} delay={i * 0.15} />
+            <HostingCard
+              key={plan.name}
+              {...plan}
+              delay={i * 0.15}
+              onBuy={() => handleBuy(plan.name + ' Hosting Plan', plan.pricePaise)}
+              loading={loadingPkg === plan.name}
+            />
           ))}
         </div>
 
@@ -436,8 +779,18 @@ export default function PricingSection() {
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="text-center"
+          className="text-center space-y-4"
         >
+          {/* Payment method note */}
+          <div className="inline-flex items-center gap-3 px-6 py-3 rounded-full glass">
+            <CreditCard className="w-4 h-4 text-[#22d3ee] flex-shrink-0" />
+            <span className="text-sm text-gray-300">
+              Instant payment via <strong className="text-[#22d3ee]">Razorpay</strong> (UPI, Cards, Net Banking). Money transferred securely to SubzAgency. Delivery starts within 24 hours after you WhatsApp your details.
+            </span>
+          </div>
+
+          <div className="block" />
+
           <div className="inline-flex items-center gap-3 px-6 py-3 rounded-full glass">
             <span className="text-sm text-gray-300">
               💡 Super competitive prices for cinematic 3D quality.{' '}
@@ -448,6 +801,24 @@ export default function PricingSection() {
           </div>
         </motion.div>
       </div>
+
+      {/* Modals */}
+      <AnimatePresence>
+        {showSuccess && <SuccessModal onClose={() => setShowSuccess(false)} />}
+      </AnimatePresence>
+      <AnimatePresence>
+        {showError && (
+          <ErrorModal
+            onRetry={() => {
+              setShowError(false);
+              if (retryOptions) {
+                openRazorpay(retryOptions);
+              }
+            }}
+            onClose={() => setShowError(false)}
+          />
+        )}
+      </AnimatePresence>
     </section>
   );
 }
