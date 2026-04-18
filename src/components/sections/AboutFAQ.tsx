@@ -99,7 +99,7 @@ function AboutSection() {
             About <span className="text-gradient-green">SubzAgency</span>
           </h2>
           <p className="text-gray-400 max-w-2xl mx-auto text-base sm:text-lg">
-            We&apos;re a passionate team of designers and developers based in India,
+            We&apos;re a passionate team of designers and developers based in Gangtok, Sikkim, India,
             obsessed with creating the most stunning cinematic web experiences on the planet.
           </p>
         </motion.div>

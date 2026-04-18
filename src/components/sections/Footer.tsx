@@ -145,7 +145,7 @@ export default function Footer() {
             <div className="lg:col-span-2">
               <NeonLogo variant="footer" onClick={scrollToTop} />
               <p className="text-sm text-gray-500 leading-relaxed mb-6 max-w-sm">
-                India&apos;s premier cinematic 3D web agency. We transform ideas into
+                Sikkim&apos;s premier cinematic 3D web agency based in Gangtok. We transform ideas into
                 breathtaking digital experiences that captivate and convert.
                 Reach us at subzagency99@gmail.com or WhatsApp +91 62970 97642.
               </p>
@@ -162,7 +162,7 @@ export default function Footer() {
                 </a>
                 <div className="flex items-center gap-3 text-sm text-gray-400">
                   <MapPin className="w-4 h-4" />
-                  Mumbai, India
+                  Gangtok, Sikkim, India
                 </div>
               </div>
             </div>
@@ -226,7 +226,7 @@ export default function Footer() {
                 <span className="heart-3d inline-block">
                   <Heart className="w-4 h-4 text-red-500 fill-red-500" />
                 </span>
-                <span>passion in India</span>
+                <span>passion in Sikkim, India</span>
                 <span className="text-base">🇮🇳</span>
               </div>
 

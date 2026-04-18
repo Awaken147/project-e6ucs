@@ -14,16 +14,16 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "SubzAgency — India's #1 Cinematic 3D Web Agency",
-  description: "Stunning 3D websites with anime.js, Three.js, and cinematic animations. Premium web design at super affordable Indian prices. Starting ₹4,999.",
-  keywords: ["3D website", "cinematic web design", "India web agency", "affordable websites", "anime.js", "Three.js", "Next.js", "web development India"],
+  title: "SubzAgency — Sikkim's #1 Cinematic 3D Web Agency",
+  description: "Stunning 3D websites with anime.js, Three.js, and cinematic animations. Premium web design from Gangtok, Sikkim, India at super affordable prices. Starting ₹9,999.",
+  keywords: ["3D website", "cinematic web design", "Sikkim web agency", "Gangtok web design", "affordable websites", "anime.js", "Three.js", "Next.js", "web development Sikkim"],
   authors: [{ name: "SubzAgency" }],
   icons: {
     icon: "https://z-cdn.chatglm.cn/z-ai/static/logo.svg",
   },
   openGraph: {
-    title: "SubzAgency — Cinematic 3D Web Agency",
-    description: "Premium 3D websites starting at ₹4,999. No hidden charges.",
+    title: "SubzAgency — Sikkim's Cinematic 3D Web Agency",
+    description: "Premium 3D websites from Gangtok, Sikkim. Starting at ₹9,999. No hidden charges.",
     type: "website",
   },
 };

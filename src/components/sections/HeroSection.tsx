@@ -145,7 +145,7 @@ export default function HeroSection() {
           className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass mb-8"
         >
           <Zap className="w-4 h-4 text-[#00ff88]" />
-          <span className="text-sm text-gray-300">India&apos;s #1 Cinematic 3D Web Agency</span>
+          <span className="text-sm text-gray-300">Sikkim&apos;s #1 Cinematic 3D Web Agency</span>
           <span className="w-2 h-2 rounded-full bg-[#00ff88] animate-pulse" />
         </motion.div>
 
