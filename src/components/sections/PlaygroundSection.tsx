@@ -30,6 +30,7 @@ function PlaygroundLoader() {
 export default function PlaygroundSection() {
   const ref = useRef<HTMLDivElement>(null);
   const isInView = useInView(ref, { once: true, margin: '-100px' });
+  const resetViewRef = useRef<(() => void) | null>(null);
 
   const demos = [
     {
@@ -126,7 +127,7 @@ export default function PlaygroundSection() {
           viewport={{ once: true }}
           className="playground-canvas relative"
         >
-          <ThreePlayground />
+          <ThreePlayground resetRef={resetViewRef} />
 
           {/* Controls overlay */}
           <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between">
@@ -138,7 +139,8 @@ export default function PlaygroundSection() {
             <motion.button
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.9 }}
-              className="flex items-center gap-1 px-3 py-1.5 rounded-lg glass text-xs text-gray-300 hover:text-[#00ff88] transition-colors"
+              onClick={() => resetViewRef.current?.()}
+              className="flex items-center gap-1 px-3 py-1.5 rounded-lg glass text-xs text-gray-300 hover:text-[#00ff88] transition-colors cursor-pointer"
             >
               <RotateCcw className="w-3 h-3" />
               Reset View

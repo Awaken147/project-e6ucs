@@ -4,7 +4,11 @@ import { useRef, useEffect, useState } from 'react';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 
-export default function ThreePlayground() {
+interface ThreePlaygroundProps {
+  resetRef?: React.MutableRefObject<(() => void) | null>;
+}
+
+export default function ThreePlayground({ resetRef }: ThreePlaygroundProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const groupsRef = useRef<THREE.Group[]>([]);
   const [sceneType, setSceneType] = useState(0);
@@ -39,6 +43,54 @@ export default function ThreePlayground() {
     controls.minDistance = 2;
     controls.autoRotate = true;
     controls.autoRotateSpeed = 0.5;
+
+    // Save initial state so reset() can restore camera position, target & zoom
+    controls.saveState();
+
+    // Expose smooth reset function to parent via resetRef
+    if (resetRef) {
+      resetRef.current = () => {
+        // Smooth animated reset: lerp camera from current to saved state over ~500ms
+        const startPos = camera.position.clone();
+        const startTarget = controls.target.clone();
+        const endPos = new THREE.Vector3(0, 2, 6);
+        const endTarget = new THREE.Vector3(0, 0, 0);
+        const duration = 500;
+        const startTime = performance.now();
+        let rafId: number;
+
+        const animateReset = (now: number) => {
+          const elapsed = now - startTime;
+          const progress = Math.min(elapsed / duration, 1);
+          // Ease out cubic for a smooth deceleration feel
+          const ease = 1 - Math.pow(1 - progress, 3);
+
+          camera.position.lerpVectors(startPos, endPos, ease);
+          controls.target.lerpVectors(startTarget, endTarget, ease);
+
+          controls.update();
+          renderer.render(scene, camera);
+
+          if (progress < 1) {
+            rafId = requestAnimationFrame(animateReset);
+          } else {
+            // Final snap + update controls state
+            controls.reset();
+            controls.update();
+            renderer.render(scene, camera);
+          }
+        };
+
+        // Cancel auto-rotate briefly during reset for a cleaner feel
+        controls.autoRotate = false;
+        rafId = requestAnimationFrame(animateReset);
+
+        // Re-enable auto-rotate after animation completes
+        setTimeout(() => {
+          controls.autoRotate = true;
+        }, duration + 100);
+      };
+    }
 
     // Lights
     scene.add(new THREE.AmbientLight(0x222244, 0.5));
@@ -229,6 +281,7 @@ export default function ThreePlayground() {
     window.addEventListener('resize', onResize);
 
     return () => {
+      if (resetRef) resetRef.current = null;
       cancelAnimationFrame(animId);
       window.removeEventListener('resize', onResize);
       controls.dispose();
