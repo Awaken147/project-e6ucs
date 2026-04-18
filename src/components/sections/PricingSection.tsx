@@ -286,7 +286,7 @@ export default function PricingSection() {
   const websitePackages = [
     {
       name: 'Starter',
-      price: '₹4,999',
+      price: '₹9,999',
       period: 'one-time',
       icon: <Zap className="w-7 h-7" />,
       accentColor: '#00ff88',
@@ -295,12 +295,11 @@ export default function PricingSection() {
         'Mobile Responsive + Basic Animations',
         '1 Month Free Hosting',
         '2 Free Revisions',
-        'Delivery in 5-7 Days',
       ],
     },
     {
       name: 'Growth',
-      price: '₹8,999',
+      price: '₹19,999',
       period: 'one-time',
       icon: <Rocket className="w-7 h-7" />,
       popular: true,
@@ -309,25 +308,23 @@ export default function PricingSection() {
       features: [
         'Up to 5-Page Cinematic 3D Website',
         'Advanced 3D + Anime.js Animations',
-        'Forms + WhatsApp + SEO',
+        'Forms, WhatsApp Integration, SEO Optimized',
         '3 Months Free Hosting',
         '2 Free Revisions',
-        'Priority Support',
       ],
     },
     {
       name: 'Premium',
-      price: '₹14,999',
+      price: '₹34,999',
       period: 'one-time',
       icon: <Crown className="w-7 h-7" />,
       accentColor: '#ffd700',
       features: [
         'Unlimited Pages + Full 3D Experience',
-        'AI Chatbot + Advanced Animations',
+        'AI Chatbot Integration + Advanced Animations',
         'E-commerce Ready',
         '6 Months Free Hosting',
         'Priority Support + 2 Free Revisions',
-        'Custom Domain + SSL',
       ],
     },
   ];
@@ -335,39 +332,33 @@ export default function PricingSection() {
   const hostingPlans = [
     {
       name: 'Basic Care',
-      price: '₹299',
+      price: '₹499',
       icon: <Shield className="w-5 h-5 text-[#00ff88]" />,
       features: [
-        'Uptime Monitoring',
-        'Monthly Backups',
-        'Email Support',
-        'SSL Certificate',
+        'Fast Hosting + SSL',
+        'Weekly Backups',
+        'Basic Updates',
       ],
     },
     {
       name: 'Growth Care',
-      price: '₹599',
+      price: '₹999',
       popular: true,
       icon: <Zap className="w-5 h-5 text-[#ffd700]" />,
       features: [
-        'Everything in Basic',
-        'Weekly Backups',
-        'Performance Optimization',
-        'Content Updates (4/mo)',
-        'WhatsApp Priority Support',
+        'Everything in Basic + Regular Content Updates',
+        'Monthly Performance Reports',
+        'Priority Support',
       ],
     },
     {
       name: 'Premium Care',
-      price: '₹999',
+      price: '₹1,999',
       icon: <Crown className="w-5 h-5 text-[#ffd700]" />,
       features: [
-        'Everything in Growth',
-        'Daily Backups',
-        'SEO Monitoring & Reports',
-        'Unlimited Content Updates',
-        'Dedicated Account Manager',
-        'Emergency Response (2hr)',
+        'Full Maintenance + Advanced Updates',
+        'Monthly New Animations/Features',
+        'Dedicated Support',
       ],
     },
   ];
@@ -394,7 +385,7 @@ export default function PricingSection() {
             className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass mb-6"
           >
             <Heart className="w-4 h-4 text-[#ff2d55]" />
-            <span className="text-sm text-gray-400">Simple, Transparent &amp; Super Affordable</span>
+            <span className="text-sm text-gray-400">Simple, Transparent &amp; Very Affordable</span>
           </motion.div>
           <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black text-white mb-4">
             Pricing That <span className="text-gradient-green">Makes Sense</span>
@@ -449,8 +440,10 @@ export default function PricingSection() {
         >
           <div className="inline-flex items-center gap-3 px-6 py-3 rounded-full glass">
             <span className="text-sm text-gray-300">
-              💡 Insanely low prices. <strong className="text-[#00ff88]">Easy installments</strong> available.{' '}
-              <strong className="text-[#ffd700]">No hidden charges.</strong>
+              💡 Super competitive prices for cinematic 3D quality.{' '}
+              <strong className="text-[#00ff88]">Easy installments</strong> available.{' '}
+              <strong className="text-[#ffd700]">No hidden charges.</strong>{' '}
+              Delivery in 3-7 days.
             </span>
           </div>
         </motion.div>

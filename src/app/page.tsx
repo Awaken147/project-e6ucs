@@ -6,6 +6,7 @@ import PricingSection from '@/components/sections/PricingSection';
 import PlaygroundSection from '@/components/sections/PlaygroundSection';
 import AboutFAQ from '@/components/sections/AboutFAQ';
 import Footer from '@/components/sections/Footer';
+import FloatingWhatsApp from '@/components/FloatingWhatsApp';
 
 export default function Home() {
   return (
@@ -18,6 +19,7 @@ export default function Home() {
         <AboutFAQ />
       </main>
       <Footer />
+      <FloatingWhatsApp />
     </div>
   );
 }
