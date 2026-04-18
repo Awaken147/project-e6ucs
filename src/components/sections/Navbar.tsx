@@ -53,11 +53,11 @@ export default function Navbar() {
             >
               <div className="relative w-9 h-9 flex items-center justify-center">
                 <div className="absolute inset-0 bg-gradient-to-br from-[#00ff88] to-[#ffd700] rounded-lg opacity-80 group-hover:opacity-100 transition-opacity" />
-                <span className="relative font-bold text-black text-sm">NX</span>
+                <span className="relative font-bold text-black text-sm">SA</span>
               </div>
               <span className="font-bold text-lg tracking-tight hidden sm:block">
-                <span className="text-white">Nexa</span>
-                <span className="text-gradient-green">Studio</span>
+                <span className="text-white">Subz</span>
+                <span className="text-gradient-green">Agency</span>
               </span>
             </motion.a>
 

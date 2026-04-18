@@ -110,7 +110,7 @@ export default function Footer() {
 
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
               <motion.a
-                href="https://wa.me/919999999999"
+                href="https://wa.me/916297097642"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-[#25D366] to-[#128C7E] text-white font-bold rounded-full hover:shadow-[0_0_30px_rgba(37,211,102,0.3)] transition-all duration-300"
@@ -123,7 +123,7 @@ export default function Footer() {
                 WhatsApp Us
               </motion.a>
               <motion.a
-                href="mailto:hello@nexastudio.in"
+                href="mailto:subzagency99@gmail.com"
                 className="inline-flex items-center gap-2 px-8 py-4 border border-white/10 text-white font-bold rounded-full hover:border-[#00ff88]/30 hover:bg-[#00ff8805] transition-all duration-300"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
@@ -144,27 +144,28 @@ export default function Footer() {
             <div className="lg:col-span-2">
               <div className="flex items-center gap-2 mb-4">
                 <div className="w-9 h-9 flex items-center justify-center bg-gradient-to-br from-[#00ff88] to-[#ffd700] rounded-lg">
-                  <span className="font-bold text-black text-sm">NX</span>
+                  <span className="font-bold text-black text-sm">SA</span>
                 </div>
                 <span className="font-bold text-lg">
-                  <span className="text-white">Nexa</span>
-                  <span className="text-gradient-green">Studio</span>
+                  <span className="text-white">Subz</span>
+                  <span className="text-gradient-green">Agency</span>
                 </span>
               </div>
               <p className="text-sm text-gray-500 leading-relaxed mb-6 max-w-sm">
                 India&apos;s premier cinematic 3D web agency. We transform ideas into
                 breathtaking digital experiences that captivate and convert.
+                Reach us at subzagency99@gmail.com or WhatsApp +91 62970 97642.
               </p>
 
               {/* Contact Info */}
               <div className="space-y-3">
-                <a href="mailto:hello@nexastudio.in" className="flex items-center gap-3 text-sm text-gray-400 hover:text-[#00ff88] transition-colors">
+                <a href="mailto:subzagency99@gmail.com" className="flex items-center gap-3 text-sm text-gray-400 hover:text-[#00ff88] transition-colors">
                   <Mail className="w-4 h-4" />
-                  hello@nexastudio.in
+                  subzagency99@gmail.com
                 </a>
-                <a href="https://wa.me/919999999999" className="flex items-center gap-3 text-sm text-gray-400 hover:text-[#00ff88] transition-colors">
+                <a href="https://wa.me/916297097642" className="flex items-center gap-3 text-sm text-gray-400 hover:text-[#00ff88] transition-colors">
                   <Phone className="w-4 h-4" />
-                  +91 99999 99999
+                  +91 62970 97642
                 </a>
                 <div className="flex items-center gap-3 text-sm text-gray-400">
                   <MapPin className="w-4 h-4" />
@@ -223,7 +224,7 @@ export default function Footer() {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5">
             <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
               <p className="text-xs text-gray-600 text-center sm:text-left">
-                &copy; {new Date().getFullYear()} NexaStudio. All rights reserved.
+                &copy; {new Date().getFullYear()} SubzAgency. All rights reserved.
               </p>
 
               {/* Made with love */}

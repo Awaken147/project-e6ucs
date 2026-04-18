@@ -96,7 +96,7 @@ function AboutSection() {
             <span className="text-sm text-gray-400">Who We Are</span>
           </motion.div>
           <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black text-white mb-4">
-            About <span className="text-gradient-green">NexaStudio</span>
+            About <span className="text-gradient-green">SubzAgency</span>
           </h2>
           <p className="text-gray-400 max-w-2xl mx-auto text-base sm:text-lg">
             We&apos;re a passionate team of designers and developers based in India,
