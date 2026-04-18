@@ -6,9 +6,10 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 
 interface ThreePlaygroundProps {
   resetRef?: React.MutableRefObject<(() => void) | null>;
+  setSceneTypeRef?: React.MutableRefObject<((type: number) => void) | null>;
 }
 
-export default function ThreePlayground({ resetRef }: ThreePlaygroundProps) {
+export default function ThreePlayground({ resetRef, setSceneTypeRef }: ThreePlaygroundProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const groupsRef = useRef<THREE.Group[]>([]);
   const [sceneType, setSceneType] = useState(0);
@@ -89,6 +90,13 @@ export default function ThreePlayground({ resetRef }: ThreePlaygroundProps) {
         setTimeout(() => {
           controls.autoRotate = true;
         }, duration + 100);
+      };
+    }
+
+    // Expose scene switching function to parent (for outer demo buttons)
+    if (setSceneTypeRef) {
+      setSceneTypeRef.current = (type: number) => {
+        setSceneType(type);
       };
     }
 
@@ -282,6 +290,7 @@ export default function ThreePlayground({ resetRef }: ThreePlaygroundProps) {
 
     return () => {
       if (resetRef) resetRef.current = null;
+      if (setSceneTypeRef) setSceneTypeRef.current = null;
       cancelAnimationFrame(animId);
       window.removeEventListener('resize', onResize);
       controls.dispose();

@@ -31,6 +31,8 @@ export default function PlaygroundSection() {
   const ref = useRef<HTMLDivElement>(null);
   const isInView = useInView(ref, { once: true, margin: '-100px' });
   const resetViewRef = useRef<(() => void) | null>(null);
+  const setSceneTypeRef = useRef<((type: number) => void) | null>(null);
+  const [activeScene, setActiveScene] = useState(0);
 
   const demos = [
     {
@@ -103,12 +105,20 @@ export default function PlaygroundSection() {
           viewport={{ once: true }}
           className="flex flex-wrap items-center justify-center gap-3 mb-8"
         >
-          {demos.map((demo) => (
+          {demos.map((demo, i) => (
             <motion.button
               key={demo.id}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              className="flex items-center gap-2 px-4 py-2.5 rounded-xl glass text-sm text-gray-300 hover:text-white hover:border-[#00ff88]/30 transition-all duration-300"
+              onClick={() => {
+                setActiveScene(i);
+                setSceneTypeRef.current?.(i);
+              }}
+              className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm transition-all duration-300 cursor-pointer ${
+                activeScene === i
+                  ? 'bg-[#00ff88]/10 text-[#00ff88] border border-[#00ff88]/30 shadow-[0_0_20px_rgba(0,255,136,0.15)]'
+                  : 'glass text-gray-300 hover:text-white hover:border-[#00ff88]/30'
+              }`}
             >
               {demo.icon}
               <div className="text-left">
@@ -127,7 +137,7 @@ export default function PlaygroundSection() {
           viewport={{ once: true }}
           className="playground-canvas relative"
         >
-          <ThreePlayground resetRef={resetViewRef} />
+          <ThreePlayground resetRef={resetViewRef} setSceneTypeRef={setSceneTypeRef} />
 
           {/* Controls overlay */}
           <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between">

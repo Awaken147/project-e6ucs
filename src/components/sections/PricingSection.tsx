@@ -26,12 +26,20 @@ interface RazorpayOptions {
 
 interface RazorpayInstance {
   open: () => void;
+  on: (event: string, handler: () => void) => void;
 }
 
 interface RazorpayResponse {
   razorpay_payment_id: string;
   razorpay_order_id?: string;
   razorpay_signature?: string;
+}
+
+/* ─── Order info passed to success modal ─── */
+interface OrderInfo {
+  packageName: string;
+  priceDisplay: string;
+  paymentId: string;
 }
 
 /* ─── 3D Tilt Card Hook ─── */
@@ -66,8 +74,38 @@ function useTilt(intensity = 15) {
   return { cardRef, handleMouseMove, handleMouseLeave };
 }
 
-/* ─── Success Modal ─── */
-function SuccessModal({ onClose }: { onClose: () => void }) {
+/* ─── Build WhatsApp URL with detailed message ─── */
+function buildWhatsAppUrl(order: OrderInfo): string {
+  const msg = [
+    `🚀 *New Order from SubzAgency Website*`,
+    ``,
+    `📋 *Package:* ${order.packageName}`,
+    `💰 *Price:* ${order.priceDisplay}`,
+    `🧾 *Payment ID:* ${order.paymentId}`,
+    ``,
+    `✅ Payment completed successfully.`,
+    `Please start my project immediately.`,
+    ``,
+    `_(Customer will share name, email & phone on this chat)_`,
+  ].join('\n');
+
+  return `https://wa.me/916297097642?text=${encodeURIComponent(msg)}`;
+}
+
+/* ─── Success Modal with auto-WhatsApp ─── */
+function SuccessModal({ order, onClose }: { order: OrderInfo; onClose: () => void }) {
+  const whatsappOpened = useRef(false);
+
+  /* Auto-open WhatsApp 2s after modal appears */
+  useEffect(() => {
+    if (whatsappOpened.current) return;
+    const timer = setTimeout(() => {
+      whatsappOpened.current = true;
+      window.open(buildWhatsAppUrl(order), '_blank', 'noopener,noreferrer');
+    }, 2000);
+    return () => clearTimeout(timer);
+  }, [order]);
+
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -137,36 +175,46 @@ function SuccessModal({ onClose }: { onClose: () => void }) {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.5 }}
-            className="text-gray-300 text-sm leading-relaxed mb-6"
+            className="text-gray-300 text-sm leading-relaxed mb-5"
           >
             Thank you for choosing <span className="text-[#00ff88] font-bold">SubzAgency</span>. Our team will contact you shortly.
           </motion.p>
 
+          {/* Order details card */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.6 }}
-            className="bg-[#00ff88]/5 border border-[#00ff88]/20 rounded-xl p-4 mb-6"
+            className="bg-[#00ff88]/5 border border-[#00ff88]/20 rounded-xl p-4 mb-5 text-left"
           >
-            <p className="text-xs text-gray-400 leading-relaxed">
-              Please WhatsApp{' '}
-              <a
-                href="https://wa.me/916297097642?text=Hi%2C%20I%20just%20paid%20for%20a%20SubzAgency%20package.%20Here%20are%20my%20order%20details."
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-[#00ff88] font-bold underline hover:text-[#00cc6a] transition-colors"
-              >
-                +91 62970 97642
-              </a>{' '}
-              with your order details to start your project immediately.
-            </p>
+            <div className="text-xs text-gray-400 space-y-1.5">
+              <p><span className="text-gray-500">Package:</span> <span className="text-white font-semibold">{order.packageName}</span></p>
+              <p><span className="text-gray-500">Amount:</span> <span className="text-[#00ff88] font-bold">{order.priceDisplay}</span></p>
+              <p><span className="text-gray-500">Payment ID:</span> <span className="text-white/70 font-mono text-[11px]">{order.paymentId}</span></p>
+            </div>
           </motion.div>
 
+          {/* Auto-redirect notice */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.8 }}
+            className="flex items-center justify-center gap-2 mb-5"
+          >
+            <motion.div
+              animate={{ rotate: 360 }}
+              transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
+              className="w-4 h-4 border-2 border-[#25D366]/30 border-t-[#25D366] rounded-full"
+            />
+            <span className="text-xs text-gray-400">Redirecting to WhatsApp automatically...</span>
+          </motion.div>
+
+          {/* Manual WhatsApp button (backup) */}
           <motion.a
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.7 }}
-            href="https://wa.me/916297097642?text=Hi%2C%20I%20just%20paid%20for%20a%20SubzAgency%20package.%20Here%20are%20my%20order%20details."
+            transition={{ delay: 0.9 }}
+            href={buildWhatsAppUrl(order)}
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-[#25D366] to-[#128C7E] text-white font-bold text-sm hover:shadow-[0_0_30px_rgba(37,211,102,0.3)] transition-all"
@@ -174,7 +222,7 @@ function SuccessModal({ onClose }: { onClose: () => void }) {
             <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
               <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
             </svg>
-            WhatsApp Us Now
+            WhatsApp +91 62970 97642
           </motion.a>
         </div>
       </motion.div>
@@ -390,8 +438,8 @@ function PricingCard({
           {/* Buy Now CTA */}
           <motion.button
             whileHover={{ scale: 1.03 }}
-            whileTap={{ scale: 0.97 }}
-            onClick={onBuy}
+            whileTap={{ scale: 0.95 }}
+            onClick={(e) => { e.preventDefault(); onBuy(); }}
             disabled={loading}
             className={`w-full py-4 rounded-xl font-bold text-sm transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60 disabled:cursor-wait ${
               popular
@@ -463,7 +511,7 @@ function HostingCard({ name, price, pricePaise: _pricePaise, features, icon, pop
       >
         <div className={`relative rounded-2xl p-6 bg-[#0a0a1a]/90 backdrop-blur-xl flex flex-col`}>
           <div className="card-3d-shine" />
-          
+
           {popular && (
             <div className="absolute top-4 right-4 flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold bg-[#ffd700]/10 text-[#ffd700] border border-[#ffd700]/20">
               <Star className="w-3 h-3" fill="#ffd700" />
@@ -497,8 +545,8 @@ function HostingCard({ name, price, pricePaise: _pricePaise, features, icon, pop
 
           <motion.button
             whileHover={{ scale: 1.03 }}
-            whileTap={{ scale: 0.97 }}
-            onClick={onBuy}
+            whileTap={{ scale: 0.95 }}
+            onClick={(e) => { e.preventDefault(); onBuy(); }}
             disabled={loading}
             className={`w-full py-2.5 rounded-lg font-semibold text-sm transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60 disabled:cursor-wait ${
               popular
@@ -537,6 +585,7 @@ export default function PricingSection() {
   const [showError, setShowError] = useState(false);
   const [loadingPkg, setLoadingPkg] = useState<string | null>(null);
   const [retryOptions, setRetryOptions] = useState<{ packageName: string; amountPaise: number } | null>(null);
+  const [orderInfo, setOrderInfo] = useState<OrderInfo | null>(null);
   const razorpayLoadedRef = useRef(false);
 
   /* Load Razorpay script */
@@ -551,18 +600,21 @@ export default function PricingSection() {
   const openRazorpay = useCallback((options: {
     packageName: string;
     amountPaise: number;
+    priceDisplay: string;
   }) => {
     setLoadingPkg(options.packageName);
 
     const loadAndOpen = () => {
       if (!window.Razorpay) {
-        // Script not yet loaded — wait briefly
+        // Script not yet loaded — wait briefly then retry
         setTimeout(() => loadAndOpen(), 300);
         return;
       }
 
+      // ⚠️ IMPORTANT: Replace "rzp_test_XXXX" with your real Razorpay Test Key ID
+      // Get one at https://dashboard.razorpay.com → Settings → API Keys
       const rzp = new window.Razorpay({
-        key: 'rzp_test_XXXX', // ⚠️ Replace with your real Razorpay Key ID
+        key: 'rzp_test_XXXX',
         amount: options.amountPaise,
         currency: 'INR',
         name: 'SubzAgency',
@@ -572,9 +624,16 @@ export default function PricingSection() {
         },
         prefill: {
           contact: '+91 ',
+          name: '',
+          email: '',
         },
-        handler: (_response: RazorpayResponse) => {
+        handler: (response: RazorpayResponse) => {
           setLoadingPkg(null);
+          setOrderInfo({
+            packageName: options.packageName,
+            priceDisplay: options.priceDisplay,
+            paymentId: response.razorpay_payment_id || 'N/A',
+          });
           setShowSuccess(true);
         },
         modal: {
@@ -586,7 +645,7 @@ export default function PricingSection() {
 
       rzp.on('payment.failed', () => {
         setLoadingPkg(null);
-        setRetryOptions(options);
+        setRetryOptions({ packageName: options.packageName, amountPaise: options.amountPaise });
         setShowError(true);
       });
 
@@ -597,8 +656,8 @@ export default function PricingSection() {
   }, []);
 
   /* Buy handlers */
-  const handleBuy = useCallback((packageName: string, amountPaise: number) => {
-    openRazorpay({ packageName, amountPaise });
+  const handleBuy = useCallback((packageName: string, amountPaise: number, priceDisplay: string) => {
+    openRazorpay({ packageName, amountPaise, priceDisplay });
   }, [openRazorpay]);
 
   const websitePackages = [
@@ -744,7 +803,7 @@ export default function PricingSection() {
               key={pkg.name}
               {...pkg}
               delay={i * 0.15}
-              onBuy={() => handleBuy(pkg.name + ' Website Package', pkg.pricePaise)}
+              onBuy={() => handleBuy(pkg.name + ' Website Package', pkg.pricePaise, pkg.price)}
               loading={loadingPkg === pkg.name}
             />
           ))}
@@ -768,7 +827,7 @@ export default function PricingSection() {
               key={plan.name}
               {...plan}
               delay={i * 0.15}
-              onBuy={() => handleBuy(plan.name + ' Hosting Plan', plan.pricePaise)}
+              onBuy={() => handleBuy(plan.name + ' Hosting Plan', plan.pricePaise, plan.price + '/month')}
               loading={loadingPkg === plan.name}
             />
           ))}
@@ -804,7 +863,12 @@ export default function PricingSection() {
 
       {/* Modals */}
       <AnimatePresence>
-        {showSuccess && <SuccessModal onClose={() => setShowSuccess(false)} />}
+        {showSuccess && orderInfo && (
+          <SuccessModal
+            order={orderInfo}
+            onClose={() => setShowSuccess(false)}
+          />
+        )}
       </AnimatePresence>
       <AnimatePresence>
         {showError && (
@@ -812,7 +876,7 @@ export default function PricingSection() {
             onRetry={() => {
               setShowError(false);
               if (retryOptions) {
-                openRazorpay(retryOptions);
+                openRazorpay({ ...retryOptions, priceDisplay: '' });
               }
             }}
             onClose={() => setShowError(false)}
