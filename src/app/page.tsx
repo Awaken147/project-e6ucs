@@ -1,5 +1,6 @@
 'use client';
 
+import React from 'react';
 import Navbar from '@/components/sections/Navbar';
 import HeroSection from '@/components/sections/HeroSection';
 import PricingSection from '@/components/sections/PricingSection';
